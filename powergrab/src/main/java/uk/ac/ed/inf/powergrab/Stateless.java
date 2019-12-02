@@ -3,11 +3,13 @@ package uk.ac.ed.inf.powergrab;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.mapbox.geojson.Point;
+
 public class Stateless extends Drone {
 
 	protected static void playGame() {
 
-		App.path = App.initializeLineString2();   //initialise the path at the beginning of the game
+		App.flight_coords = new ArrayList<Point>();   //initialise the path at the beginning of the game
 		while (nr_moves < 250 && drone_power >= 1.25) {  //we are playing until we reach 250 moves or the drone runs out of power
 			int ok = 0; 		//flag that tells the drone to move randomly if set to 0 or not if set to 1
 			for (Direction d : Direction.values()){      
@@ -24,18 +26,18 @@ public class Stateless extends Drone {
 						if (nr_moves != 0) {
 							result_txt += "\n";
 						}
+						drone_power -= 1.25;  //subtract the power needed for the move before 
+											 //adding the value to the result string(as these are the requirements)
 						result_txt = result_txt + App.pos.latitude + "," + App.pos.longitude + "," + d + ","        
 								+ App.pos.nextPosition(d).latitude + "," + App.pos.nextPosition(d).longitude + ","
 								+ drone_coins + "," + drone_power;
-						App.pos = App.pos.nextPosition(d);    //change position
+						App.pos = App.pos.nextPosition(d);    //update the position
 						addToLine(App.pos);                  //put the new position in the path
 						nr_moves++;
-						drone_power -= 1.25;
-						Connect(k);
+						Always_Connect();
 						ok = 1;        		//set flag to 1 in order not to move randomly before simulating again
 					}
-				}
-				
+				}				
 			}
 			while (ok == 0) {                            // go randomly
 				exclude = new ArrayList<Integer>();		//reinitialise the array with directions to be excluded
@@ -47,6 +49,8 @@ public class Stateless extends Drone {
 					if (nr_moves != 0){
 						result_txt += "\n";
 					}
+					drone_power -= 1.25; //subtract the power needed for the move before 
+					 					//adding the value to the result string(as these are the requirements)
 					result_txt = result_txt + App.pos.latitude + "," + App.pos.longitude + ","
 							+ Direction.values()[randomInt] + ","
 							+ App.pos.nextPosition(Direction.values()[randomInt]).latitude + ","
@@ -55,11 +59,10 @@ public class Stateless extends Drone {
 					App.pos = App.pos.nextPosition(Direction.values()[randomInt]);
 					addToLine(App.pos);
 					nr_moves++;
-					drone_power -= 1.25;
 					Always_Connect();    //check if it can connect to anything around, just in case
-					ok = 1;    //change the flag in oder to get out of the "while" condition
+					ok = 1;             //change the flag in oder to get out of the "while" condition
 
-				} else{		//if "exclude" is empty, just go randomly			
+				} else{		//if "exclude" is empty, just go randomly
 					int randomInt = App.randomGenerator.nextInt(16);					
 					Position nextpos = App.pos.nextPosition(Direction.values()[randomInt]);
 					if (nextpos.inPlayArea()) {
@@ -68,6 +71,8 @@ public class Stateless extends Drone {
 						if (nr_moves != 0) {
 							result_txt += "\n";
 						}
+						drone_power -= 1.25;  //subtract the power needed for the move before 
+	 										 //adding the value to the result string(as these are the requirements)
 						result_txt = result_txt + App.pos.latitude + "," + App.pos.longitude + ","
 								+ Direction.values()[randomInt] + ","
 								+ App.pos.nextPosition(Direction.values()[randomInt]).latitude + ","
@@ -76,15 +81,12 @@ public class Stateless extends Drone {
 						App.pos = App.pos.nextPosition(Direction.values()[randomInt]);
 						addToLine(App.pos);
 						nr_moves++;
-						drone_power -= 1.25;
 						Always_Connect();	//check if it can connect to anything around, just in case
 						ok = 1;
-
+						
 					}
 				}
 			}
 		}
-
 	}
-
 }

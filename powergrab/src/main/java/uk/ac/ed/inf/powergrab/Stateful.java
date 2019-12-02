@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class Stateful extends Drone {
+import com.mapbox.geojson.Point;
 
+public class Stateful extends Drone {
 	private static ArrayList<Double> PositiveStations;      //arraylist with distances from drone position to every positive station 
 	private static HashMap<Double, Integer> MapPositives;  //hashmap that maps the distances above with the indexes of the stations
 	private static ArrayList<Double> DirectionDistance;	  //arraylist with distances from every simulation to the closest positive station
@@ -14,7 +15,7 @@ public class Stateful extends Drone {
 
 	protected static void playGame() {
 
-		App.path = App.initializeLineString2();
+		App.flight_coords = new ArrayList<Point>();
 		Visited = new HashMap<String, Integer>();	//initialise the Visited hashmap and add the start position 
 		Visited.put(App.pos.toString(), 1);
 
@@ -24,13 +25,15 @@ public class Stateful extends Drone {
 			if (ClosestIndex == -1) {		//if there are no positive stations left:
 				RandomToFinish();		   //execute this method until the end of the game
 				break;					  //break out of the "while" condition 	
-
 			}
 
 			Direction d = DecideDirection(ClosestIndex);	//find the best direction to go towards the closest positive station
 			if (nr_moves != 0) {
 				result_txt += "\n";
 			}
+			drone_power -= 1.25;   //subtract the power needed for the move before 
+							 	  //adding the value to the result string(as these are the requirements)
+
 			result_txt = result_txt + App.pos.latitude + "," + App.pos.longitude + "," + d + ","
 					+ App.pos.nextPosition(d).latitude + "," + App.pos.nextPosition(d).longitude + "," + drone_coins
 					+ "," + drone_power;
@@ -47,7 +50,6 @@ public class Stateful extends Drone {
 			}
 			addToLine(App.pos);
 			nr_moves++;
-			drone_power -= 1.25;
 		}
 
 	}
@@ -89,7 +91,7 @@ public class Stateful extends Drone {
 
 						return true;    //we set the threshold for avoiding red stations like this:
 							//we don't avoid the red station only if its range have common points with 
-					       //the green station we are going towards
+					       //the green station's range we are going towards
 					
 					return false;	//otherwise we return false(so we avoid it)
 
@@ -135,26 +137,29 @@ public class Stateful extends Drone {
 				if (nr_moves != 0) {
 					result_txt += "\n";
 				}
+				drone_power -= 1.25;  //subtract the power needed for the move before 
+									 //adding the value to the result string(as these are the requirements)
 				result_txt = result_txt + App.pos.latitude + "," + App.pos.longitude + ","
 						+ Direction.values()[randomInt] + ","
 						+ App.pos.nextPosition(Direction.values()[randomInt]).latitude + ","
 						+ App.pos.nextPosition(Direction.values()[randomInt]).longitude + "," + drone_coins + ","
 						+ drone_power;
-				App.pos = App.pos.nextPosition(Direction.values()[randomInt]);
+				App.pos = App.pos.nextPosition(Direction.values()[randomInt]);  //update the position of the drone
 				addToLine(App.pos);
 				nr_moves++;
-				drone_power -= 1.25;
 
 			} else {
 
-				int randomInt = App.randomGenerator.nextInt(16);
-				Position nextpos = App.pos.nextPosition(Direction.values()[randomInt]);
+				int randomInt = App.randomGenerator.nextInt(16);	//generate a random index between 0 and 15(inclusive)
+				Position nextpos = App.pos.nextPosition(Direction.values()[randomInt]);	  //move randomly 
 				if (nextpos.inPlayArea()) {
 					distanceToStations = new ArrayList<Double>();
 					mapDistanceToStations = new HashMap<Double, Integer>();
 					if (nr_moves != 0) {
 						result_txt += "\n";
 					}
+					drone_power -= 1.25;  //subtract the power needed for the move before 
+										 //adding the value to the result string(as these are the requirements)
 					result_txt = result_txt + App.pos.latitude + "," + App.pos.longitude + ","
 							+ Direction.values()[randomInt] + ","
 							+ App.pos.nextPosition(Direction.values()[randomInt]).latitude + ","
@@ -163,7 +168,6 @@ public class Stateful extends Drone {
 					App.pos = App.pos.nextPosition(Direction.values()[randomInt]);
 					addToLine(App.pos);
 					nr_moves++;
-					drone_power -= 1.25;
 				}
 			}
 

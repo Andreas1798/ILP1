@@ -2,10 +2,10 @@ package uk.ac.ed.inf.powergrab;
 
 import java.util.Arrays;
 
-public class Position {
+public class Position{
 	public double latitude;
 	public double longitude;
-	
+	public int a;
 	public Position(double latitude, double longitude) {
 		this.latitude=latitude;
 		this.longitude=longitude;
@@ -13,12 +13,11 @@ public class Position {
 	}
 	
 	public Position nextPosition(Direction direction) {
-		double r = 0.0003;
-		int a = Arrays.asList(direction.values()).indexOf(direction);
+		a = Arrays.asList(Direction.values()).indexOf(direction);
 		
 		double angle = a*22.5;
-		double nextLat = latitude + Math.cos(Math.toRadians(angle))*r;
-		double nextLon = longitude + Math.sin(Math.toRadians(angle))*r;
+		double nextLat = latitude + Math.cos(Math.toRadians(angle))*Drone.radius;
+		double nextLon = longitude + Math.sin(Math.toRadians(angle))*Drone.radius;
 		
 		Position newPos = new Position(nextLat, nextLon);
 		return newPos;
